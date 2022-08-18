@@ -1,0 +1,50 @@
+<html>
+    <head>
+        <title>Tic Tac Toe client</title>
+        <meta charset="utf-8">
+    </head>
+    <body>
+        <div id="out"></div>
+    </body>
+    <script type="text/javascript">
+        let connection = null;
+        let clientID = 0;
+        const connect = () => {
+            const serverUrl = 'ws://localhost:8901';
+
+            connection = new WebSocket(serverUrl, "json");
+
+            const log = (...args) => document.getElementById('out').innerHTML += args.join(', ') + '<br>';
+
+            connection.onopen = (evt) => {
+                log('open');
+                log(JSON.stringify(evt));
+            }
+
+            connection.onmessage = (evt) => {
+                log('message:');
+                let data = JSON.parse(evt.data);
+                log(data.msg);
+                switch (data.type) {
+                    case 'init': 
+                        clientID = data.id;
+                        log('set id', clientID);
+                        connection.send(JSON.stringify({action: 'move', x: 1, y: 1}));
+                    break;
+                }
+            }
+
+            connection.onerror = (evt) => {
+                log('error');
+                log(JSON.stringify(evt));
+            }
+
+            connection.onclose = (evt) => {
+                log('close');
+                log(JSON.stringify(evt));
+            }
+        }
+
+        connect();
+    </script>
+</html>
